@@ -3,7 +3,7 @@
 #include <iostream>
 
 namespace core {
-Decryptor::Decryptor(keyPair::PrivateKey privKey) : key(std::move(privKey)) {}
+Decryptor::Decryptor(PrivateKey privKey) : key(std::move(privKey)) {}
 
 std::string Decryptor::decrypt(const std::vector<uint8_t>& ciphertext) const {
     std::string plaintext;

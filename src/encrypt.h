@@ -9,11 +9,11 @@
 namespace core {
 class Encryptor {
 private:
-    keyPair::PublicKey key;
+    PublicKey key;
 
 public:
     // Constructor binds the encryption process to a specific Public Key
-    explicit Encryptor(keyPair::PublicKey  pubKey);
+    explicit Encryptor(PublicKey  pubKey);
 
     // Performs RSA encryption on a plaintext string
     [[nodiscard]] std::vector<uint8_t> encrypt(const std::string& plaintext) const;

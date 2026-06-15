@@ -1,7 +1,7 @@
 #include "encrypt.h"
 
 namespace core {
-Encryptor::Encryptor(keyPair::PublicKey  pubKey) : key(std::move(pubKey)) {}
+Encryptor::Encryptor(PublicKey pubKey) : key(std::move(pubKey)) {}
 
 std::vector<uint8_t> Encryptor::encrypt(const std::string& plaintext) const {
     std::vector<uint8_t> ciphertext;

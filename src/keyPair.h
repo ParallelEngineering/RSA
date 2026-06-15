@@ -7,39 +7,33 @@
 #include <vector>
 
 #include "base256.h"
+#include "key_fwd.h"
 
 #define KEY_FOLDER "rsa-keys"
 
 enum { NONE, PUBLIC, PRIVATE, BOTH };
 
+struct PublicKey {
+    operations::Base256 n;
+    operations::Base256 e;
+
+    [[nodiscard]] std::vector<uint8_t> serialize() const;
+};
+
+struct PrivateKey {
+    operations::Base256 n;
+    operations::Base256 d;
+
+    [[nodiscard]] std::vector<uint8_t> serialize() const;
+};
+
 class keyPair {
-    static constexpr char base64Chars[] =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-public:
-    struct PublicKey {
-        operations::Base256 n;
-        operations::Base256 e;
-
-        [[nodiscard]]
-        std::vector<uint8_t> serialize() const {
-            return s_serialize(n, e);
-        }
-    };
-
-    struct PrivateKey {
-        operations::Base256 n;
-        operations::Base256 d;
-
-        [[nodiscard]]
-        std::vector<uint8_t> serialize() const {
-            return s_serialize(n, d);
-        }
-    };
-
 private:
     PublicKey public_key;
     PrivateKey private_key;
+
+    static constexpr char base64Chars[] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     static std::vector<uint8_t> s_serialize(const operations::Base256 &first,
                                             const operations::Base256 &second);
