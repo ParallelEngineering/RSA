@@ -6,7 +6,7 @@
 
 // Serializes two 4 bytes Byte Arrays with Big endian
 std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
-                                        const operations::Base256 &second) {
+                                          const operations::Base256 &second) {
     std::vector<uint8_t> serialized;
     const auto &firstBytes = first.getBytes();
     const auto &secondBytes = second.getBytes();
@@ -33,7 +33,7 @@ std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
 
 // Deserializes two 4 bytes Byte Arrays with Big endian
 bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
-                          operations::Base256 &outSecond) {
+                            operations::Base256 &outSecond) {
     if (data.size() < 8) return false;
 
     size_t index = 0;

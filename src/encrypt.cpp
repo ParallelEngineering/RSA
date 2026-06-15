@@ -21,7 +21,8 @@ std::vector<uint8_t> Encryptor::encrypt(const std::string& plaintext) const {
         std::vector<uint8_t> c_bytes = c_num.getBytes();
 
         // 4. Padding: Pad the byte vector with trailing zeros up to the required block size.
-        //    (Assuming little-endian layout, where the most significant bytes are placed at the end)
+        //    (Assuming little-endian layout, where the most significant bytes are placed at the
+        //    end)
         while (c_bytes.size() < blockSize) {
             c_bytes.push_back(0);
         }
@@ -32,4 +33,4 @@ std::vector<uint8_t> Encryptor::encrypt(const std::string& plaintext) const {
 
     return ciphertext;
 }
-}
+}  // namespace core

@@ -8,16 +8,16 @@
 
 namespace core {
 class Decryptor {
-private:
+   private:
     PrivateKey key;
 
-public:
+   public:
     // Constructor binds the decryption process to a specific Private Key
-    explicit Decryptor(PrivateKey  privKey);
+    explicit Decryptor(PrivateKey privKey);
 
     // Performs RSA decryption on a ciphertext byte vector
     [[nodiscard]] std::string decrypt(const std::vector<uint8_t>& ciphertext) const;
 };
-}
+}  // namespace core
 
 #endif
