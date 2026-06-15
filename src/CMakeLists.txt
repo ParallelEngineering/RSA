@@ -2,7 +2,6 @@ add_library(RSA
         decrypt.cpp
         encrypt.cpp
         keyPair.cpp
-        key_fwd.h
 )
 
 # Add src directory to path for header includes
