@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.20)
-project(RSA-Encryptor CXX)
+add_library(RSA
+        decrypt.cpp
+        encrypt.cpp
+        keyPair.cpp
+)
 
-add_subdirectory(core)
-add_subdirectory(cli)
-
-add_executable(RSA-Encryptor main.cpp)
-
-target_link_libraries(RSA-Encryptor PRIVATE Base256 RSA-CLI)
+# Add src directory to path for header includes
+target_include_directories(RSA
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
