@@ -4,6 +4,118 @@
 #include <fstream>
 #include <string>
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <bcrypt.h>
+#pragma comment(lib, "bcrypt.lib")
+#else
+#include <sys/random.h>
+#endif
+
+#include "math_utils.h"
+
+
+namespace {
+    // 256 bytes = 2048 bits for prime p and q.
+    // Resulting in a 4096-bit RSA modulus n = p * q.
+    constexpr size_t PRIME_SIZE_BYTES = 256;
+
+    // Reads cryptographically secure random bytes from the operating system
+    std::vector<uint8_t> getSecureRandomBytes(size_t size) {
+        std::vector<uint8_t> buffer(size);
+    #if defined(_WIN32)
+        // Windows BCrypt API
+        BCryptGenRandom(nullptr, buffer.data(), static_cast<ULONG>(size), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    #else
+        // Linux/macOS: getentropy() with /dev/urandom as a fallback
+        #if defined(__GLIBC__) && ((__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))
+        if (getentropy(buffer.data(), size) == 0) {
+            return buffer;
+        }
+        #endif
+        std::ifstream urandom("/dev/urandom", std::ios::binary);
+        if (urandom.is_open()) {
+            urandom.read(reinterpret_cast<char*>(buffer.data()), size);
+        }
+    #endif
+        return buffer;
+    }
+
+    // Generates a random odd candidate with the most significant bit set
+    std::vector<uint8_t> generateCandidateBytes() {
+        std::vector<uint8_t> candidate = getSecureRandomBytes(PRIME_SIZE_BYTES);
+
+        // Ensure the most significant bit (MSB) is set (little endian)
+        candidate[PRIME_SIZE_BYTES - 1] |= 0x80;
+
+        // Ensure the number is odd (least significant bit = 1)
+        candidate[0] |= 0x01;
+
+        return candidate;
+    }
+
+    // Generates a cryptographically secure 2048-bit prime number
+    operations::Base256 generateSecurePrime() {
+        std::vector<uint8_t> candidateBytes = generateCandidateBytes();
+        operations::Base256 candidate(candidateBytes);
+
+        // Search sequentially for the next prime using the math_utils library
+        while (!operations::math::isPrime(candidate)) {
+            candidate += operations::Base256(2);
+        }
+        return candidate;
+    }
+}
+
+// Default Constructor: Generates a new secure 4096-bit RSA keypair
+keyPair::keyPair() {
+    const operations::Base256 p = generateSecurePrime();
+    operations::Base256 q = generateSecurePrime();
+
+    // Ensure p and q are not identical
+    while (p == q) {
+        q = generateSecurePrime();
+    }
+
+    operations::Base256 phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
+    const operations::Base256 e(65537);
+
+    // Ensure e and phi are coprime
+    while (operations::math::gcd(e, phi) != operations::Base256(1)) {
+        q = generateSecurePrime();
+        while (p == q) {
+            q = generateSecurePrime();
+        }
+        phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
+    }
+
+    const operations::Base256 n = p * q;
+    const operations::Base256 d = operations::math::modInverse(e, phi);
+
+    public_key.n = n;
+    public_key.e = e;
+
+    private_key.n = n;
+    private_key.d = d;
+}
+
+// Import Constructor: Imports keys from Base64 encoded serialized strings
+keyPair::keyPair(const std::string& publicKey, const std::string& privateKey) {
+    const std::vector<uint8_t> pubBytes = base64Decode(publicKey);
+    s_deserialize(pubBytes, public_key.n, public_key.e);
+
+    const std::vector<uint8_t> privBytes = base64Decode(privateKey);
+    s_deserialize(privBytes, private_key.n, private_key.d);
+}
+
+std::vector<uint8_t> PublicKey::serialize() const {
+    return keyPair::s_serialize(n, e);
+}
+
+std::vector<uint8_t> PrivateKey::serialize() const {
+    return keyPair::s_serialize(n, d);
+}
+
 // Serializes two 4 bytes Byte Arrays with Big endian
 std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
                                           const operations::Base256 &second) {

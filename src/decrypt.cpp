@@ -1,14 +1,15 @@
 #include "decrypt.h"
+#include "math_utils.h"
 
 #include <iostream>
 
-namespace core {
-Decryptor::Decryptor(PrivateKey privKey) : key(std::move(privKey)) {}
+using namespace operations::math;
 
-std::string Decryptor::decrypt(const std::vector<uint8_t>& ciphertext) const {
+namespace core::decryptor {
+std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext)  {
     std::string plaintext;
 
-    const size_t blockSize = key.n.getBytes().size();
+    const size_t blockSize = keyPair.getPrivateKey().n.getBytes().size();
     if (blockSize == 0 || ciphertext.size() % blockSize != 0) {
         std::cerr << "Decryption error: Invalid ciphertext block size alignment." << std::endl;
         return plaintext;
@@ -23,12 +24,11 @@ std::string Decryptor::decrypt(const std::vector<uint8_t>& ciphertext) const {
         const operations::Base256 c_num(chunk);
 
         // 3. Perform RSA mathematical operation: M = C^d mod n
-        operations::Base256 m_num = operations::Base256::modPow(c_num, key.d, key.n);
+        operations::Base256 m_num = modPow(c_num, keyPair.getPrivateKey().d, keyPair.getPrivateKey().n);
 
         // 4. Retrieve the decrypted byte value and convert it back to a character
         const auto& m_bytes = m_num.getBytes();
         if (!m_bytes.empty()) {
-            // Assuming little-endian layout where index 0 is the least significant byte
             plaintext.push_back(static_cast<char>(m_bytes[0]));
         } else {
             plaintext.push_back('\0');  // Fallback for a zero-value block
@@ -37,4 +37,4 @@ std::string Decryptor::decrypt(const std::vector<uint8_t>& ciphertext) const {
 
     return plaintext;
 }
-}  // namespace core
+}

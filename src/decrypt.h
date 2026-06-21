@@ -7,16 +7,10 @@
 #include "keyPair.h"
 
 namespace core {
-class Decryptor {
-   private:
-    PrivateKey key;
-
-   public:
-    // Constructor binds the decryption process to a specific Private Key
-    explicit Decryptor(PrivateKey privKey);
+namespace decryptor {
 
     // Performs RSA decryption on a ciphertext byte vector
-    [[nodiscard]] std::string decrypt(const std::vector<uint8_t>& ciphertext) const;
+    [[nodiscard]] std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext);
 };
 }  // namespace core
 
