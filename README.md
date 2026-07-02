@@ -13,7 +13,7 @@ decryption primitives.
 - Public and private key structs with serialization helpers
 - Base64 helper functions for encoded key or byte-vector data
 
-## Installation and Integration
+## Integration
 
 Clone the repository with its submodules:
 
