@@ -1,13 +1,17 @@
-# RSA
+# RSA 
 
 RSA is an educational C++20 library for RSA-style encryption and
-decryption primitives. It exposes `core::Encryptor`, `core::Decryptor`,
-`PublicKey`, `PrivateKey`, and `keyPair`, and uses the custom `Base256`
-big-integer library for modular arithmetic beyond native integer sizes.
+decryption primitives. 
 
 > [!IMPORTANT]
 > This project is experimental and intended for learning/library exploration.
 > It is not production-ready cryptography.
+
+## Features
+
+- RSA-style encryption and decryption APIs
+- Public and private key structs with serialization helpers
+- Base64 helper functions for encoded key or byte-vector data
 
 ## Installation and Integration
 
@@ -23,6 +27,13 @@ subdirectory and link against the `RSA` target:
 ```cmake
 add_subdirectory(path/to/RSA-Encryptor)
 target_link_libraries(YourTarget PRIVATE RSA)
+```
+
+You can also build the library directly with CMake:
+
+```sh
+cmake -S . -B build
+cmake --build build
 ```
 
 ## Basic Usage
@@ -50,12 +61,3 @@ int main() {
     std::string plaintext = decryptor.decrypt(ciphertext);
 }
 ```
-
-## Architecture
-
-- `src/` contains the RSA-facing library target, exposed as `RSA`.
-- `core::Encryptor` encrypts byte data with the RSA operation `C = M^e mod n`.
-- `core::Decryptor` decrypts ciphertext blocks with `M = C^d mod n`.
-- `keyPair` owns the current public/private key data and provides serialization
-  helpers.
-
