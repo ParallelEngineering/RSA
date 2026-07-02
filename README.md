@@ -1,23 +1,63 @@
-# RSA Encryptor
+# RSA 
 
-## Overview
+RSA is an educational C++20 library for RSA-style encryption and
+decryption primitives. 
 
-**RSA Encryptor** is a simple RSA encryption and decryption library written in C++. It implements its own routines for handling large numbers using base-256 representation and is released under the [AGPL License](https://www.gnu.org/licenses/agpl-3.0.html).
-> [!NOTE]
-> This project uses `clang-format 20` for code formatting and is built and tested on macOS, Windows, and Ubuntu.
+> [!IMPORTANT]
+> This project is experimental and intended for learning/library exploration.
+> The goal is to become production-ready in the future.
 
-## License
+## Features
 
-RSA Encryptor is distributed under the [AGPL License](https://www.gnu.org/licenses/agpl-3.0.html). See the `LICENSE` file for more details.
+- RSA-style encryption and decryption APIs
+- Public and private key structs with serialization helpers
+- Base64 helper functions for encoded key or byte-vector data
 
-## Contact
+## Integration
 
-For issues, please open an issue on the GitHub repository or contact the maintainers directly under this email mail@parallelengineering.org.
+Clone the repository with its submodules:
 
-## Roadmap
-- [x] Get informed about RSA
-- [x] Write utility functions
-- [x] Add workflows
-- [ ] Implement encryption
-- [ ] Implement decryption
-- [ ] Beautify CLI output
+```sh
+git clone --recurse-submodules https://github.com/ParallelEngineering/RSA-Encryptor.git
+```
+
+To integrate the library into another CMake project, add this repository as a
+subdirectory and link against the `RSA` target:
+
+```cmake
+add_subdirectory(path/to/RSA-Encryptor)
+target_link_libraries(YourTarget PRIVATE RSA)
+```
+
+You can also build the library directly with CMake:
+
+```sh
+cmake -S . -B build
+cmake --build build
+```
+
+## Basic Usage
+
+```cpp
+#include "decrypt.h"
+#include "encrypt.h"
+#include "keyPair.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+int main() {
+    keyPair keys;
+
+    PublicKey publicKey = keys.getPublicKey();
+    PrivateKey privateKey = keys.getPrivateKey();
+
+    core::Encryptor encryptor(publicKey);
+    core::Decryptor decryptor(privateKey);
+
+    const std::string message = "hello";
+    std::vector<uint8_t> ciphertext = encryptor.encrypt(message);
+    std::string plaintext = decryptor.decrypt(ciphertext);
+}
+```
