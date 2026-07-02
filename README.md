@@ -5,7 +5,7 @@ decryption primitives.
 
 > [!IMPORTANT]
 > This project is experimental and intended for learning/library exploration.
-> It is not production-ready cryptography.
+> The goal is to become production-ready in the future.
 
 ## Features
 
