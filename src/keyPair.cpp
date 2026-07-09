@@ -9,8 +9,8 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600
 #endif
-#include <windows.h>
 #include <bcrypt.h>
+#include <windows.h>
 #else
 #include <sys/random.h>
 #endif
