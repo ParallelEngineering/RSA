@@ -57,7 +57,7 @@ int main() {
     core::Decryptor decryptor(privateKey);
 
     const std::string message = "hello";
-    std::vector<uint8_t> ciphertext = encryptor.encrypt(message);
+    ByteArray ciphertext = encryptor.encrypt(message);
     std::string plaintext = decryptor.decrypt(ciphertext);
 }
 ```
