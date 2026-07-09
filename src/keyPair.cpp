@@ -2,14 +2,134 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
-// Serializes two 4 bytes Byte Arrays with Big endian
+// clang-format off
+#if defined(_WIN32)
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
+#include <windows.h>
+#include <bcrypt.h>
+#else
+#include <sys/random.h>
+#endif
+// clang-format on
+
+#include "helper.h"
+#include "math_utils.h"
+
+namespace {
+// 256 bytes = 2048 bits for prime p and q.
+// Resulting in a 4096-bit RSA modulus n = p * q.
+constexpr size_t PRIME_SIZE_BYTES = 256;
+
+// Reads cryptographically secure random bytes from the operating system
+std::vector<uint8_t> getSecureRandomBytes(size_t size) {
+    std::vector<uint8_t> buffer(size);
+#if defined(_WIN32)
+    // Windows BCrypt API
+    const NTSTATUS status = BCryptGenRandom(nullptr, buffer.data(), static_cast<ULONG>(size),
+                                            BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    if (status < 0) {
+        throw std::runtime_error("BCryptGenRandom failed");
+    }
+#else
+// Linux/macOS: getentropy() with /dev/urandom as a fallback
+#if defined(__GLIBC__) && ((__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))
+    if (getentropy(buffer.data(), size) == 0) {
+        return buffer;
+    }
+#endif
+    std::ifstream urandom("/dev/urandom", std::ios::binary);
+    if (urandom.is_open()) {
+        urandom.read(reinterpret_cast<char *>(buffer.data()), size);
+    }
+#endif
+    return buffer;
+}
+
+// Generates a random odd candidate with the most significant bit set
+std::vector<uint8_t> generateCandidateBytes() {
+    std::vector<uint8_t> candidate = getSecureRandomBytes(PRIME_SIZE_BYTES);
+
+    // Ensure the most significant bit (MSB) is set (little endian)
+    candidate[PRIME_SIZE_BYTES - 1] |= 0x80;
+
+    // Ensure the number is odd (least significant bit = 1)
+    candidate[0] |= 0x01;
+
+    return candidate;
+}
+
+// Generates a cryptographically secure 2048-bit prime number
+operations::Base256 generateSecurePrime() {
+    std::vector<uint8_t> candidateBytes = generateCandidateBytes();
+    // Convert 256 byte vector to Base256 representation using 64-bit limbs
+    operations::Base256 candidate(bytesToByteArray(candidateBytes));
+
+    // Search sequentially for the next prime using the math_utils library
+    while (!operations::math::isPrime(candidate)) {
+        candidate += operations::Base256(2);
+    }
+    return candidate;
+}
+}  // namespace
+
+// Default Constructor: Generates a new secure 4096-bit RSA keypair
+keyPair::keyPair() {
+    const operations::Base256 p = generateSecurePrime();
+    operations::Base256 q = generateSecurePrime();
+
+    // Ensure p and q are not identical
+    while (p == q) {
+        q = generateSecurePrime();
+    }
+
+    operations::Base256 phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
+    const operations::Base256 e(65537);
+
+    // Ensure e and phi are coprime
+    while (operations::math::gcd(e, phi) != operations::Base256(1)) {
+        q = generateSecurePrime();
+        while (p == q) {
+            q = generateSecurePrime();
+        }
+        phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
+    }
+
+    const operations::Base256 n = p * q;
+    const operations::Base256 d = operations::math::modInverse(e, phi);
+
+    public_key.n = n;
+    public_key.e = e;
+
+    private_key.n = n;
+    private_key.d = d;
+}
+
+// Import Constructor: Imports keys from Base64 encoded serialized strings
+keyPair::keyPair(const std::string &publicKey, const std::string &privateKey) {
+    const std::vector<uint8_t> pubBytes = base64Decode(publicKey);
+    s_deserialize(pubBytes, public_key.n, public_key.e);
+
+    const std::vector<uint8_t> privBytes = base64Decode(privateKey);
+    s_deserialize(privBytes, private_key.n, private_key.d);
+}
+
+std::vector<uint8_t> PublicKey::serialize() const { return keyPair::s_serialize(n, e); }
+
+std::vector<uint8_t> PrivateKey::serialize() const { return keyPair::s_serialize(n, d); }
+
+// Serializes two Base256 fields with Big-endian size headers
 std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
                                           const operations::Base256 &second) {
     std::vector<uint8_t> serialized;
-    const auto &firstBytes = first.getBytes();
-    const auto &secondBytes = second.getBytes();
+
+    // Safely extract the raw byte stream from the 64-bit limb vectors
+    std::vector<uint8_t> firstBytes = byteArrayToBytes(first.getBytes());
+    std::vector<uint8_t> secondBytes = byteArrayToBytes(second.getBytes());
 
     uint32_t firstSize = firstBytes.size();
     uint32_t secondSize = secondBytes.size();
@@ -31,7 +151,7 @@ std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
     return serialized;
 }
 
-// Deserializes two 4 bytes Byte Arrays with Big endian
+// Deserializes two Base256 fields with Big-endian size headers
 bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
                             operations::Base256 &outSecond) {
     if (data.size() < 8) return false;
@@ -63,8 +183,9 @@ bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base25
         secondBegin + static_cast<std::vector<uint8_t>::difference_type>(secondSize);
     std::vector<uint8_t> secondBytes(secondBegin, secondEnd);
 
-    outFirst = operations::Base256(firstBytes);
-    outSecond = operations::Base256(secondBytes);
+    // Convert deserialized byte streams back into 64-bit limb vectors
+    outFirst = operations::Base256(bytesToByteArray(firstBytes));
+    outSecond = operations::Base256(bytesToByteArray(secondBytes));
 
     return true;
 }

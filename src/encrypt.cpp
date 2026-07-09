@@ -1,36 +1,33 @@
 #include "encrypt.h"
 
-namespace core {
-Encryptor::Encryptor(PublicKey pubKey) : key(std::move(pubKey)) {}
+#include "helper.h"
+#include "math_utils.h"
 
-std::vector<uint8_t> Encryptor::encrypt(const std::string& plaintext) const {
+using namespace operations::math;
+
+namespace core::encryptor {
+std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext) {
     std::vector<uint8_t> ciphertext;
 
-    // The ciphertext block size is determined by the byte-length of the modulus n
-    const size_t blockSize = key.n.getBytes().size();
+    // The block size in bytes is determined by the size of modulus n multiplied by 8 (64 bits per
+    // limb)
+    const size_t blockSize = keyPair.getPublicKey().n.getBytes().size() * 8;
     if (blockSize == 0) return ciphertext;
 
     for (const char c : plaintext) {
-        // 1. Convert the character byte to an arbitrary-precision Base256 representation
+        // 1. Convert the character byte to the internal 64-bit limb representation
         const operations::Base256 m(static_cast<uint8_t>(c));
 
         // 2. Perform RSA mathematical operation: C = M^e mod n
-        operations::Base256 c_num = operations::Base256::modPow(m, key.e, key.n);
+        operations::Base256 c_num = modPow(m, keyPair.getPublicKey().e, keyPair.getPublicKey().n);
 
-        // 3. Extract the raw bytes from the computed ciphertext number
-        std::vector<uint8_t> c_bytes = c_num.getBytes();
+        // 3. Extract raw bytes from the computed ciphertext number (padded to target block size)
+        std::vector<uint8_t> c_bytes = byteArrayToBytes(c_num.getBytes(), blockSize);
 
-        // 4. Padding: Pad the byte vector with trailing zeros up to the required block size.
-        //    (Assuming little-endian layout, where the most significant bytes are placed at the
-        //    end)
-        while (c_bytes.size() < blockSize) {
-            c_bytes.push_back(0);
-        }
-
-        // 5. Append the padded block to the final ciphertext vector
+        // 4. Append the padded block to the final ciphertext vector
         ciphertext.insert(ciphertext.end(), c_bytes.begin(), c_bytes.end());
     }
 
     return ciphertext;
 }
-}  // namespace core
+}  // namespace core::encryptor
