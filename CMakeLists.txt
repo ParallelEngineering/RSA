@@ -12,4 +12,4 @@ add_subdirectory(src)
         add_subdirectory(tests)
 
 target_link_libraries(RSA PUBLIC Base256)
-target_include_directories(RSA PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(RSA PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
