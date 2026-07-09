@@ -8,9 +8,9 @@
 
 namespace core {
 namespace encryptor {
-    // Performs RSA encryption on a plaintext string
-    [[nodiscard]] std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext) ;
-};
+// Performs RSA encryption on a plaintext string
+[[nodiscard]] std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext);
+};  // namespace encryptor
 }  // namespace core
 
 #endif

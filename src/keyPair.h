@@ -35,19 +35,17 @@ class keyPair {
     static constexpr char base64Chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-
    public:
     keyPair();
 
-    keyPair(const std::string& publicKey, const std::string& privateKey);
+    keyPair(const std::string &publicKey, const std::string &privateKey);
 
     PublicKey getPublicKey() { return public_key; }
     PrivateKey getPrivateKey() { return private_key; }
 
     static std::vector<uint8_t> s_serialize(const operations::Base256 &first,
-                                        const operations::Base256 &second);
-    static bool s_deserialize(const std::vector<uint8_t>
-        &data, operations::Base256 &outFirst,
+                                            const operations::Base256 &second);
+    static bool s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
                               operations::Base256 &outSecond);
 
     // Base64 helper functions

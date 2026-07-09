@@ -2,12 +2,12 @@
 #include <string>
 #include <vector>
 
-#include "encrypt.h"
 #include "decrypt.h"
+#include "encrypt.h"
 #include "keyPair.h"
 
-using core::encryptor::encrypt;
 using core::decryptor::decrypt;
+using core::encryptor::encrypt;
 
 TEST_CASE("RSA Core: Basic Encryption and Decryption Roundtrip") {
     static keyPair pair;

@@ -9,9 +9,9 @@
 namespace core {
 namespace decryptor {
 
-    // Performs RSA decryption on a ciphertext byte vector
-    [[nodiscard]] std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext);
-};
+// Performs RSA decryption on a ciphertext byte vector
+[[nodiscard]] std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext);
+};  // namespace decryptor
 }  // namespace core
 
 #endif
