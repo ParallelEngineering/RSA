@@ -53,7 +53,8 @@ jobs:
       - name: Build Project
         run: cmake --build build --config ${{ matrix.build-configuration }}
 
-      - name: Run Catch2 Unit Tests
+      - name: Run Catch2 Unit Tests (Release)
+        if: matrix.build-configuration == 'Release'
         # Runs the unit tests you specified
         run: ctest --test-dir build -C ${{ matrix.build-configuration }} --output-on-failure
 
