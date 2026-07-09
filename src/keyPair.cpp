@@ -2,12 +2,15 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
 #if defined(_WIN32)
-#include <bcrypt.h>
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
 #include <windows.h>
-#pragma comment(lib, "bcrypt.lib")
+#include <bcrypt.h>
 #else
 #include <sys/random.h>
 #endif
@@ -24,8 +27,11 @@ std::vector<uint8_t> getSecureRandomBytes(size_t size) {
     std::vector<uint8_t> buffer(size);
 #if defined(_WIN32)
     // Windows BCrypt API
-    BCryptGenRandom(nullptr, buffer.data(), static_cast<ULONG>(size),
-                    BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    const NTSTATUS status = BCryptGenRandom(nullptr, buffer.data(), static_cast<ULONG>(size),
+                                            BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    if (status < 0) {
+        throw std::runtime_error("BCryptGenRandom failed");
+    }
 #else
 // Linux/macOS: getentropy() with /dev/urandom as a fallback
 #if defined(__GLIBC__) && ((__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))

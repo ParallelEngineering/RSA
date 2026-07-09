@@ -5,9 +5,6 @@
 #include <filesystem>
 #include <string>
 #include <vector>
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 #include "base256.h"
 #include "key_fwd.h"
