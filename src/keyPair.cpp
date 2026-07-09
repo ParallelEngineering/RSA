@@ -16,6 +16,7 @@
 #endif
 
 #include "math_utils.h"
+#include "helper.h"
 
 namespace {
 // 256 bytes = 2048 bits for prime p and q.
@@ -63,7 +64,8 @@ std::vector<uint8_t> generateCandidateBytes() {
 // Generates a cryptographically secure 2048-bit prime number
 operations::Base256 generateSecurePrime() {
     std::vector<uint8_t> candidateBytes = generateCandidateBytes();
-    operations::Base256 candidate(candidateBytes);
+    // Convert 256 byte vector to Base256 representation using 64-bit limbs
+    operations::Base256 candidate(bytesToByteArray(candidateBytes));
 
     // Search sequentially for the next prime using the math_utils library
     while (!operations::math::isPrime(candidate)) {
@@ -118,12 +120,14 @@ std::vector<uint8_t> PublicKey::serialize() const { return keyPair::s_serialize(
 
 std::vector<uint8_t> PrivateKey::serialize() const { return keyPair::s_serialize(n, d); }
 
-// Serializes two 4 bytes Byte Arrays with Big endian
+// Serializes two Base256 fields with Big-endian size headers
 std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
                                           const operations::Base256 &second) {
     std::vector<uint8_t> serialized;
-    const auto &firstBytes = first.getBytes();
-    const auto &secondBytes = second.getBytes();
+
+    // Safely extract the raw byte stream from the 64-bit limb vectors
+    std::vector<uint8_t> firstBytes = byteArrayToBytes(first.getBytes());
+    std::vector<uint8_t> secondBytes = byteArrayToBytes(second.getBytes());
 
     uint32_t firstSize = firstBytes.size();
     uint32_t secondSize = secondBytes.size();
@@ -145,7 +149,7 @@ std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
     return serialized;
 }
 
-// Deserializes two 4 bytes Byte Arrays with Big endian
+// Deserializes two Base256 fields with Big-endian size headers
 bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
                             operations::Base256 &outSecond) {
     if (data.size() < 8) return false;
@@ -177,8 +181,9 @@ bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base25
         secondBegin + static_cast<std::vector<uint8_t>::difference_type>(secondSize);
     std::vector<uint8_t> secondBytes(secondBegin, secondEnd);
 
-    outFirst = operations::Base256(firstBytes);
-    outSecond = operations::Base256(secondBytes);
+    // Convert deserialized byte streams back into 64-bit limb vectors
+    outFirst = operations::Base256(bytesToByteArray(firstBytes));
+    outSecond = operations::Base256(bytesToByteArray(secondBytes));
 
     return true;
 }
