@@ -5,15 +5,17 @@
 #include <stdexcept>
 #include <string>
 
+// clang-format off
 #if defined(_WIN32)
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600
 #endif
-#include <bcrypt.h>
 #include <windows.h>
+#include <bcrypt.h>
 #else
 #include <sys/random.h>
 #endif
+// clang-format on
 
 #include "helper.h"
 #include "math_utils.h"
