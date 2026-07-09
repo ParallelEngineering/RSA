@@ -1,12 +1,13 @@
 #include "decrypt.h"
-#include "math_utils.h"
 
 #include <iostream>
+
+#include "math_utils.h"
 
 using namespace operations::math;
 
 namespace core::decryptor {
-std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext)  {
+std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext) {
     std::string plaintext;
 
     const size_t blockSize = keyPair.getPrivateKey().n.getBytes().size();
@@ -24,7 +25,8 @@ std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext)  {
         const operations::Base256 c_num(chunk);
 
         // 3. Perform RSA mathematical operation: M = C^d mod n
-        operations::Base256 m_num = modPow(c_num, keyPair.getPrivateKey().d, keyPair.getPrivateKey().n);
+        operations::Base256 m_num =
+            modPow(c_num, keyPair.getPrivateKey().d, keyPair.getPrivateKey().n);
 
         // 4. Retrieve the decrypted byte value and convert it back to a character
         const auto& m_bytes = m_num.getBytes();
@@ -37,4 +39,4 @@ std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext)  {
 
     return plaintext;
 }
-}
+}  // namespace core::decryptor

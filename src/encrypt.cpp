@@ -1,10 +1,11 @@
 #include "encrypt.h"
+
 #include "math_utils.h"
 
 using namespace operations::math;
 
 namespace core::encryptor {
-std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext)  {
+std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext) {
     std::vector<uint8_t> ciphertext;
 
     // The ciphertext block size is determined by the byte-length of the modulus n
@@ -32,4 +33,4 @@ std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext)  {
 
     return ciphertext;
 }
-}
+}  // namespace core::encryptor
