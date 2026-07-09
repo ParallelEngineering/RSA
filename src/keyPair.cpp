@@ -9,14 +9,14 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600
 #endif
-#include <windows.h>
 #include <bcrypt.h>
+#include <windows.h>
 #else
 #include <sys/random.h>
 #endif
 
-#include "math_utils.h"
 #include "helper.h"
+#include "math_utils.h"
 
 namespace {
 // 256 bytes = 2048 bits for prime p and q.

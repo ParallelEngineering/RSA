@@ -1,8 +1,9 @@
 #include "decrypt.h"
 
 #include <iostream>
-#include "math_utils.h"
+
 #include "helper.h"
+#include "math_utils.h"
 
 using namespace operations::math;
 
@@ -10,7 +11,8 @@ namespace core::decryptor {
 std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext) {
     std::string plaintext;
 
-    // The block size in bytes is determined by the size of modulus n multiplied by 8 (64 bits per limb)
+    // The block size in bytes is determined by the size of modulus n multiplied by 8 (64 bits per
+    // limb)
     const size_t blockSize = keyPair.getPrivateKey().n.getBytes().size() * 8;
     if (blockSize == 0 || ciphertext.size() % blockSize != 0) {
         std::cerr << "Decryption error: Invalid ciphertext block size alignment." << std::endl;

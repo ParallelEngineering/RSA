@@ -1,6 +1,7 @@
 #include "encrypt.h"
-#include "math_utils.h"
+
 #include "helper.h"
+#include "math_utils.h"
 
 using namespace operations::math;
 
@@ -8,7 +9,8 @@ namespace core::encryptor {
 std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext) {
     std::vector<uint8_t> ciphertext;
 
-    // The block size in bytes is determined by the size of modulus n multiplied by 8 (64 bits per limb)
+    // The block size in bytes is determined by the size of modulus n multiplied by 8 (64 bits per
+    // limb)
     const size_t blockSize = keyPair.getPublicKey().n.getBytes().size() * 8;
     if (blockSize == 0) return ciphertext;
 

@@ -27,7 +27,8 @@
 }
 
 // Converts a 64-bit word array to a little-endian byte array
-[[nodiscard]] inline std::vector<uint8_t> byteArrayToBytes(const ByteArray& data, size_t targetSize = 0) {
+[[nodiscard]] inline std::vector<uint8_t> byteArrayToBytes(const ByteArray& data,
+                                                           size_t targetSize = 0) {
     std::vector<uint8_t> bytes;
     bytes.reserve(data.size() * 8);
     for (uint64_t word : data) {
