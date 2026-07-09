@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 // clang-format off
 #if defined(_WIN32)
@@ -109,6 +110,10 @@ keyPair::keyPair() {
     private_key.d = d;
 }
 
+// Constructor for already deserialized key structures
+keyPair::keyPair(PublicKey publicKey, PrivateKey privateKey)
+    : public_key(std::move(publicKey)), private_key(std::move(privateKey)) {}
+
 // Import Constructor: Imports keys from Base64 encoded serialized strings
 keyPair::keyPair(const std::string &publicKey, const std::string &privateKey) {
     const std::vector<uint8_t> pubBytes = base64Decode(publicKey);
@@ -188,6 +193,26 @@ bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base25
     outSecond = operations::Base256(bytesToByteArray(secondBytes));
 
     return true;
+}
+
+// Static factory that creates a keyPair from populated PublicKey and PrivateKey structs
+keyPair keyPair::create(const PublicKey &publicKey, const PrivateKey &privateKey) {
+    return keyPair(publicKey, privateKey);
+}
+
+// Static factory that deserializes raw binary data and creates a keyPair
+keyPair keyPair::create(const std::vector<uint8_t> &pubData, const std::vector<uint8_t> &privData) {
+    PublicKey pub;
+    PrivateKey priv;
+
+    if (!s_deserialize(pubData, pub.n, pub.e)) {
+        throw std::runtime_error("Failed to deserialize public key data.");
+    }
+    if (!s_deserialize(privData, priv.n, priv.d)) {
+        throw std::runtime_error("Failed to deserialize private key data.");
+    }
+
+    return keyPair(pub, priv);
 }
 
 std::string keyPair::base64Encode(const std::vector<uint8_t> &data) {
