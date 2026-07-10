@@ -48,7 +48,8 @@ class keyPair {
 
     // Static factory methods to safely create a keyPair
     static keyPair create(const PublicKey &publicKey, const PrivateKey &privateKey);
-    static keyPair create(const std::vector<uint8_t> &pubData, const std::vector<uint8_t> &privData);
+    static keyPair create(const std::vector<uint8_t> &pubData,
+                          const std::vector<uint8_t> &privData);
 
     static std::vector<uint8_t> s_serialize(const operations::Base256 &first,
                                             const operations::Base256 &second);

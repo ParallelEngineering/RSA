@@ -119,7 +119,7 @@ TEST_CASE("RSA Core: Key Creation and Struct-based Initialization") {
     }
 
     SECTION("Creating keyPair from invalid/corrupt serialized bytes throws exception") {
-        std::vector<uint8_t> invalidPub = {1, 2, 3, 4}; // Invalid size and payload
+        std::vector<uint8_t> invalidPub = {1, 2, 3, 4};  // Invalid size and payload
         std::vector<uint8_t> invalidPriv = {5, 6, 7, 8};
 
         // Expect std::runtime_error as specified in keyPair::create
