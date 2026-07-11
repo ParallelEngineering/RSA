@@ -16,10 +16,10 @@ std::vector<uint8_t> encrypt(keyPair& keyPair, const std::string& plaintext) {
 
     for (const char c : plaintext) {
         // 1. Convert the character byte to the internal 64-bit limb representation
-        const operations::Base256 m(static_cast<uint8_t>(c));
+        const operations::BigInt m(static_cast<uint8_t>(c));
 
         // 2. Perform RSA mathematical operation: C = M^e mod n
-        operations::Base256 c_num = modPow(m, keyPair.getPublicKey().e, keyPair.getPublicKey().n);
+        operations::BigInt c_num = modPow(m, keyPair.getPublicKey().e, keyPair.getPublicKey().n);
 
         // 3. Extract raw bytes from the computed ciphertext number (padded to target block size)
         std::vector<uint8_t> c_bytes = byteArrayToBytes(c_num.getBytes(), blockSize);

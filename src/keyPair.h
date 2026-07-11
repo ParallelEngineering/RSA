@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "base256.h"
+#include "bigint.h"
 #include "key_fwd.h"
 
 #define KEY_FOLDER "rsa-keys"
@@ -14,15 +14,15 @@
 enum { NONE, PUBLIC, PRIVATE, BOTH };
 
 struct PublicKey {
-    operations::Base256 n;
-    operations::Base256 e;
+    operations::BigInt n;
+    operations::BigInt e;
 
     [[nodiscard]] std::vector<uint8_t> serialize() const;
 };
 
 struct PrivateKey {
-    operations::Base256 n;
-    operations::Base256 d;
+    operations::BigInt n;
+    operations::BigInt d;
 
     [[nodiscard]] std::vector<uint8_t> serialize() const;
 };
@@ -51,10 +51,10 @@ class keyPair {
     static keyPair create(const std::vector<uint8_t> &pubData,
                           const std::vector<uint8_t> &privData);
 
-    static std::vector<uint8_t> s_serialize(const operations::Base256 &first,
-                                            const operations::Base256 &second);
-    static bool s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
-                              operations::Base256 &outSecond);
+    static std::vector<uint8_t> s_serialize(const operations::BigInt &first,
+                                            const operations::BigInt &second);
+    static bool s_deserialize(const std::vector<uint8_t> &data, operations::BigInt &outFirst,
+                              operations::BigInt &outSecond);
 
     // Base64 helper functions
     static std::string base64Encode(const std::vector<uint8_t> &data);

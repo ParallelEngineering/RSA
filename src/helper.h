@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "base256.h"
+#include "bigint.h"
 #include "key_fwd.h"
 
 // Converts a little-endian byte array to a 64-bit word array

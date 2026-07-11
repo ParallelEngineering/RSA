@@ -25,10 +25,10 @@ std::string decrypt(keyPair& keyPair, const std::vector<uint8_t>& ciphertext) {
         std::vector<uint8_t> chunk(ciphertext.begin() + i, ciphertext.begin() + i + blockSize);
 
         // 2. Construct representation from the extracted block chunk (using 64-bit limbs)
-        const operations::Base256 c_num(bytesToByteArray(chunk));
+        const operations::BigInt c_num(bytesToByteArray(chunk));
 
         // 3. Perform RSA mathematical operation: M = C^d mod n
-        operations::Base256 m_num =
+        operations::BigInt m_num =
             modPow(c_num, keyPair.getPrivateKey().d, keyPair.getPrivateKey().n);
 
         // 4. Retrieve the decrypted byte value and convert it back to a character

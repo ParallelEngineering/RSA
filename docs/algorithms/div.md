@@ -102,7 +102,7 @@ When the loop finishes processing the final bit (`dividendIndex < 0`), whatever 
 *(Note: Because of this architecture, evaluating `A % B` requires the exact same computational effort as `A / B`. Therefore, if both the quotient and remainder are needed, they are extracted simultaneously to halve CPU cycles).*
 
 ### 5. Final Normalization
-Even though pre-allocation is tightly bound to the `initialDividendIndex`, the final quotient might have leading zeros depending on the magnitude of the divisor. The `div` function concludes by stripping any trailing zero-bytes from the little-endian vector to maintain strict `Base256` normalization guarantees.
+Even though pre-allocation is tightly bound to the `initialDividendIndex`, the final quotient might have leading zeros depending on the magnitude of the divisor. The `div` function concludes by stripping any trailing zero-bytes from the little-endian vector to maintain strict `BigInt` normalization guarantees.
 
 ---
 
