@@ -75,3 +75,54 @@ TEST_CASE("RSA Core: Key Serialization and Base64 Import/Export") {
 
     REQUIRE(recovered == plaintext);
 }
+
+TEST_CASE("RSA Core: Key Creation and Struct-based Initialization") {
+    static keyPair originalPair;
+
+    SECTION("Creating keyPair from deserialized PublicKey and PrivateKey structs") {
+        PublicKey pub = originalPair.getPublicKey();
+        PrivateKey priv = originalPair.getPrivateKey();
+
+        // 1. Verify the new struct-based constructor
+        keyPair constructedPair(pub, priv);
+
+        std::string plaintext = "Struct Constructor Roundtrip Verification";
+        std::vector<uint8_t> ciphertext = encrypt(constructedPair, plaintext);
+        std::string recovered = decrypt(originalPair, ciphertext);
+
+        REQUIRE(recovered == plaintext);
+
+        // 2. Verify the static factory method 'create' with structs
+        keyPair factoryStructPair = keyPair::create(pub, priv);
+
+        std::vector<uint8_t> ciphertext2 = encrypt(originalPair, plaintext);
+        std::string recovered2 = decrypt(factoryStructPair, ciphertext2);
+
+        REQUIRE(recovered2 == plaintext);
+    }
+
+    SECTION("Creating keyPair from raw serialized byte vectors") {
+        std::vector<uint8_t> pubBytes = originalPair.getPublicKey().serialize();
+        std::vector<uint8_t> privBytes = originalPair.getPrivateKey().serialize();
+
+        REQUIRE_FALSE(pubBytes.empty());
+        REQUIRE_FALSE(privBytes.empty());
+
+        // Verify the static factory method 'create' with raw byte vectors (bypassing Base64)
+        keyPair factoryBytesPair = keyPair::create(pubBytes, privBytes);
+
+        std::string plaintext = "Binary Serialization Factory Verification";
+        std::vector<uint8_t> ciphertext = encrypt(factoryBytesPair, plaintext);
+        std::string recovered = decrypt(originalPair, ciphertext);
+
+        REQUIRE(recovered == plaintext);
+    }
+
+    SECTION("Creating keyPair from invalid/corrupt serialized bytes throws exception") {
+        std::vector<uint8_t> invalidPub = {1, 2, 3, 4};  // Invalid size and payload
+        std::vector<uint8_t> invalidPriv = {5, 6, 7, 8};
+
+        // Expect std::runtime_error as specified in keyPair::create
+        REQUIRE_THROWS_AS(keyPair::create(invalidPub, invalidPriv), std::runtime_error);
+    }
+}
