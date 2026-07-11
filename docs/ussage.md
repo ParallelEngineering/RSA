@@ -1,7 +1,7 @@
 
 # Library Usage Guide
 
-This document explains how to integrate, build, and use the RSA-style cryptographic library in your C++20 projects.
+This document explains how to integrate, build, and use the RSA-style cryptographic library.
 
 ## Workflow Overview
 
@@ -69,21 +69,4 @@ std::string privBase64 = keyPair::base64Encode(keys.getPrivateKey().serialize())
 ```cpp
 // Initialize a keyPair by providing the Base64-encoded serialized keys
 keyPair importedKeys(pubBase64, privBase64);
-```
-
----
-
-## 3. CMake Integration
-
-If you want to use this library as a subdirectory in your own CMake project, follow these steps:
-
-1. Add this library to your project structure (e.g., inside a `third_party` folder).
-2. Reference it in your `CMakeLists.txt`:
-
-```cmake
-# Add the library subdirectory
-add_subdirectory(third_party/RSA-Encryptor)
-
-# Link against the RSA target
-target_link_libraries(YourExecutable PRIVATE RSA)
 ```
