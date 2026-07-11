@@ -65,14 +65,14 @@ std::vector<uint8_t> generateCandidateBytes() {
 }
 
 // Generates a cryptographically secure 2048-bit prime number
-operations::Base256 generateSecurePrime() {
+operations::BigInt generateSecurePrime() {
     std::vector<uint8_t> candidateBytes = generateCandidateBytes();
-    // Convert 256 byte vector to Base256 representation using 64-bit limbs
-    operations::Base256 candidate(bytesToByteArray(candidateBytes));
+    // Convert 256 byte vector to BigInt representation using 64-bit limbs
+    operations::BigInt candidate(bytesToByteArray(candidateBytes));
 
     // Search sequentially for the next prime using the math_utils library
     while (!operations::math::isPrime(candidate)) {
-        candidate += operations::Base256(2);
+        candidate += operations::BigInt(2);
     }
     return candidate;
 }
@@ -80,28 +80,28 @@ operations::Base256 generateSecurePrime() {
 
 // Default Constructor: Generates a new secure 4096-bit RSA keypair
 keyPair::keyPair() {
-    const operations::Base256 p = generateSecurePrime();
-    operations::Base256 q = generateSecurePrime();
+    const operations::BigInt p = generateSecurePrime();
+    operations::BigInt q = generateSecurePrime();
 
     // Ensure p and q are not identical
     while (p == q) {
         q = generateSecurePrime();
     }
 
-    operations::Base256 phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
-    const operations::Base256 e(65537);
+    operations::BigInt phi = (p - operations::BigInt(1)) * (q - operations::BigInt(1));
+    const operations::BigInt e(65537);
 
     // Ensure e and phi are coprime
-    while (operations::math::gcd(e, phi) != operations::Base256(1)) {
+    while (operations::math::gcd(e, phi) != operations::BigInt(1)) {
         q = generateSecurePrime();
         while (p == q) {
             q = generateSecurePrime();
         }
-        phi = (p - operations::Base256(1)) * (q - operations::Base256(1));
+        phi = (p - operations::BigInt(1)) * (q - operations::BigInt(1));
     }
 
-    const operations::Base256 n = p * q;
-    const operations::Base256 d = operations::math::modInverse(e, phi);
+    const operations::BigInt n = p * q;
+    const operations::BigInt d = operations::math::modInverse(e, phi);
 
     public_key.n = n;
     public_key.e = e;
@@ -127,9 +127,9 @@ std::vector<uint8_t> PublicKey::serialize() const { return keyPair::s_serialize(
 
 std::vector<uint8_t> PrivateKey::serialize() const { return keyPair::s_serialize(n, d); }
 
-// Serializes two Base256 fields with Big-endian size headers
-std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
-                                          const operations::Base256 &second) {
+// Serializes two BigInt fields with Big-endian size headers
+std::vector<uint8_t> keyPair::s_serialize(const operations::BigInt &first,
+                                          const operations::BigInt &second) {
     std::vector<uint8_t> serialized;
 
     // Safely extract the raw byte stream from the 64-bit limb vectors
@@ -156,9 +156,9 @@ std::vector<uint8_t> keyPair::s_serialize(const operations::Base256 &first,
     return serialized;
 }
 
-// Deserializes two Base256 fields with Big-endian size headers
-bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base256 &outFirst,
-                            operations::Base256 &outSecond) {
+// Deserializes two BigInt fields with Big-endian size headers
+bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::BigInt &outFirst,
+                            operations::BigInt &outSecond) {
     if (data.size() < 8) return false;
 
     size_t index = 0;
@@ -189,8 +189,8 @@ bool keyPair::s_deserialize(const std::vector<uint8_t> &data, operations::Base25
     std::vector<uint8_t> secondBytes(secondBegin, secondEnd);
 
     // Convert deserialized byte streams back into 64-bit limb vectors
-    outFirst = operations::Base256(bytesToByteArray(firstBytes));
-    outSecond = operations::Base256(bytesToByteArray(secondBytes));
+    outFirst = operations::BigInt(bytesToByteArray(firstBytes));
+    outSecond = operations::BigInt(bytesToByteArray(secondBytes));
 
     return true;
 }

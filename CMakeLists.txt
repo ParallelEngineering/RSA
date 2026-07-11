@@ -11,5 +11,5 @@ add_subdirectory(src)
     include(CTest)
         add_subdirectory(tests)
 
-target_link_libraries(RSA PUBLIC Base256)
+target_link_libraries(RSA PUBLIC BigInt)
 target_include_directories(RSA PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
