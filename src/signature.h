@@ -8,14 +8,11 @@
 
 namespace core::signature {
 
-[[nodiscard]] std::vector<std::uint8_t> signDigest(
-    const PrivateKey& privateKey,
-    const std::vector<std::uint8_t>& digest);
+[[nodiscard]] std::vector<std::uint8_t> signDigest(const PrivateKey& privateKey,
+                                                   const std::vector<std::uint8_t>& digest);
 
-[[nodiscard]] bool verifyDigest(
-    const PublicKey& publicKey,
-    const std::vector<std::uint8_t>& digest,
-    const std::vector<std::uint8_t>& signature);
+[[nodiscard]] bool verifyDigest(const PublicKey& publicKey, const std::vector<std::uint8_t>& digest,
+                                const std::vector<std::uint8_t>& signature);
 
 }  // namespace core::signature
 

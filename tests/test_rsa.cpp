@@ -129,12 +129,10 @@ TEST_CASE("RSA Core: Key Creation and Struct-based Initialization") {
 }
 
 TEST_CASE("RSA Core: Digest signatures prove private-key possession") {
-    keyPair pairA(
-        PublicKey{operations::BigInt(3233), operations::BigInt(17)},
-        PrivateKey{operations::BigInt(3233), operations::BigInt(2753)});
-    keyPair pairB(
-        PublicKey{operations::BigInt(2773), operations::BigInt(17)},
-        PrivateKey{operations::BigInt(2773), operations::BigInt(157)});
+    keyPair pairA(PublicKey{operations::BigInt(3233), operations::BigInt(17)},
+                  PrivateKey{operations::BigInt(3233), operations::BigInt(2753)});
+    keyPair pairB(PublicKey{operations::BigInt(2773), operations::BigInt(17)},
+                  PrivateKey{operations::BigInt(2773), operations::BigInt(157)});
     const std::vector<std::uint8_t> digest = {0x2A};
 
     const auto signature = core::signature::signDigest(pairA.getPrivateKey(), digest);
@@ -148,15 +146,15 @@ TEST_CASE("RSA Core: Digest signatures prove private-key possession") {
     SECTION("A modified digest does not verify the signature") {
         auto modifiedDigest = digest;
         modifiedDigest.front() ^= 0x01;
-        REQUIRE_FALSE(core::signature::verifyDigest(
-            pairA.getPublicKey(), modifiedDigest, signature));
+        REQUIRE_FALSE(
+            core::signature::verifyDigest(pairA.getPublicKey(), modifiedDigest, signature));
     }
 
     SECTION("A modified signature is rejected") {
         auto modifiedSignature = signature;
         modifiedSignature.back() ^= 0x01;
-        REQUIRE_FALSE(core::signature::verifyDigest(
-            pairA.getPublicKey(), digest, modifiedSignature));
+        REQUIRE_FALSE(
+            core::signature::verifyDigest(pairA.getPublicKey(), digest, modifiedSignature));
     }
 
     SECTION("Malformed inputs are rejected") {

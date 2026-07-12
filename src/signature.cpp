@@ -6,8 +6,7 @@
 namespace core::signature {
 namespace {
 
-[[nodiscard]] operations::BigInt digestToInteger(
-    const std::vector<std::uint8_t>& digest) {
+[[nodiscard]] operations::BigInt digestToInteger(const std::vector<std::uint8_t>& digest) {
     return operations::BigInt(bytesToByteArray(digest));
 }
 
@@ -17,9 +16,8 @@ namespace {
 
 }  // namespace
 
-std::vector<std::uint8_t> signDigest(
-    const PrivateKey& privateKey,
-    const std::vector<std::uint8_t>& digest) {
+std::vector<std::uint8_t> signDigest(const PrivateKey& privateKey,
+                                     const std::vector<std::uint8_t>& digest) {
     const operations::BigInt one(1);
     if (digest.empty() || privateKey.n <= one || privateKey.d <= one) {
         return {};
@@ -30,18 +28,15 @@ std::vector<std::uint8_t> signDigest(
         return {};
     }
 
-    const auto signature = operations::math::modPow(
-        digestInteger, privateKey.d, privateKey.n);
+    const auto signature = operations::math::modPow(digestInteger, privateKey.d, privateKey.n);
     return byteArrayToBytes(signature.getBytes(), modulusSize(privateKey.n));
 }
 
-bool verifyDigest(
-    const PublicKey& publicKey,
-    const std::vector<std::uint8_t>& digest,
-    const std::vector<std::uint8_t>& signature) {
+bool verifyDigest(const PublicKey& publicKey, const std::vector<std::uint8_t>& digest,
+                  const std::vector<std::uint8_t>& signature) {
     const operations::BigInt one(1);
-    if (digest.empty() || publicKey.n <= one || publicKey.e <= one
-        || signature.size() != modulusSize(publicKey.n)) {
+    if (digest.empty() || publicKey.n <= one || publicKey.e <= one ||
+        signature.size() != modulusSize(publicKey.n)) {
         return false;
     }
 
@@ -51,8 +46,8 @@ bool verifyDigest(
         return false;
     }
 
-    const auto verifiedDigest = operations::math::modPow(
-        signatureInteger, publicKey.e, publicKey.n);
+    const auto verifiedDigest =
+        operations::math::modPow(signatureInteger, publicKey.e, publicKey.n);
     return verifiedDigest == digestInteger;
 }
 
